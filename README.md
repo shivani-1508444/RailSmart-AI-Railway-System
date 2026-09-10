@@ -62,3 +62,18 @@ Open your browser at:
 - **Passenger Account:** `user@railsmart.com` / `user123`
 - **Admin Portal:** `admin@railsmart.com` / `admin123`
 *(Or click the 1-Click Demo buttons on the Login page)*
+
+## 💳 Future Paid API Integrations
+
+The following paid APIs are planned for future integration into RailSmart to provide real-time railway services, AI assistance, payments, and communication features:
+
+| API / Service                                          | Purpose                                                         |
+| ------------------------------------------------------ | --------------------------------------------------------------- |
+| 🚆 **Railway API — RailRadar**                         | Train search, railway data, and related train services          |
+| 🤖 **AI API — Google Gemini API**                      | AI-powered RailBot assistant and intelligent travel assistance  |
+| 💳 **Payment API — Razorpay**                          | Secure online payment processing for train bookings             |
+| 📡 **Real-Time Train API — RailRadar Live Status API** | Live train running status, delays, and real-time tracking       |
+| 📱 **SMS API — Twilio**                                | Booking confirmations, alerts, OTPs, and journey notifications  |
+| 📧 **Email API — Resend**                              | Booking confirmations, tickets, alerts, and email notifications |
+
+> **Note:** These paid APIs are planned for future implementation. API keys and credentials will be stored securely using environment variables and will not be exposed in the public repository.
