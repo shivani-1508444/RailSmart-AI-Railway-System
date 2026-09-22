@@ -9,22 +9,30 @@
     "client": "cd client && npm run dev",
     "dev": "concurrently \"npm run server:dev\" \"npm run client\"",
     "seed": "node server/seed.js",
-    "install-deps": "npm install --prefix server && npm install --prefix client",
-    "build": "npm run install-deps && cd client && npm run build",
-    "vercel-build": "npm run install-deps && cd client && npm run build",
+    "build": "cd client && npm run build",
+    "vercel-build": "cd client && npm run build",
     "start": "node server/server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "chart.js": "^4.5.1",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^4.22.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.24.4",
-    "socket.io": "^4.8.3"
+    "qrcode.react": "^3.2.0",
+    "react": "^18.3.1",
+    "react-chartjs-2": "^5.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.6",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
     "concurrently": "^10.0.5",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "vite": "^5.4.21"
   }
 }
