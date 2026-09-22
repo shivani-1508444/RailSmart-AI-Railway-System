@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 let isConnected = false;
 let memoryServer = null;
 
+// Disable Mongoose buffering so un-connected DB queries fail fast instead of hanging HTTP requests
+mongoose.set('bufferCommands', false);
+
 const connectDB = async () => {
   if (isConnected && mongoose.connection.readyState === 1) {
     return;
@@ -12,22 +15,24 @@ const connectDB = async () => {
 
   try {
     const conn = await mongoose.connect(primaryUri, {
-      serverSelectionTimeoutMS: 2500
+      serverSelectionTimeoutMS: 3000
     });
 
     isConnected = true;
-    console.log(`MongoDB Connected (Primary): ${conn.connection.host}`);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
     await checkAndSeed();
     return;
   } catch (primaryErr) {
-    console.warn(`Primary MongoDB notice (${primaryErr.message}). Launching In-Memory Engine Fallback...`);
+    console.warn(`Primary MongoDB Notice: ${primaryErr.message}`);
   }
 
-  // Fallback to In-Memory MongoDB Engine so DB NEVER fails or crashes
+  // Fallback to In-Memory MongoDB engine if available
   try {
     if (!memoryServer) {
       const { MongoMemoryServer } = require('mongodb-memory-server');
-      memoryServer = await MongoMemoryServer.create();
+      memoryServer = await MongoMemoryServer.create({
+        instance: { dbName: 'railsmart' }
+      });
     }
     const memUri = memoryServer.getUri();
     const conn = await mongoose.connect(memUri);
@@ -35,11 +40,12 @@ const connectDB = async () => {
     console.log(`✅ In-Memory MongoDB Engine Connected Successfully: ${conn.connection.host}`);
     await checkAndSeed();
   } catch (memErr) {
-    console.error('Failed to start In-Memory MongoDB:', memErr.message);
+    console.warn('In-Memory MongoDB Notice:', memErr.message);
   }
 };
 
 const checkAndSeed = async () => {
+  if (mongoose.connection.readyState !== 1) return;
   try {
     const Train = require('../models/Train');
     const count = await Train.countDocuments();

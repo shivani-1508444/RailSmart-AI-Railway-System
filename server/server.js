@@ -12,16 +12,6 @@ const { startReminderScheduler } = require('./services/reminderService');
 
 const app = express();
 
-// Middleware to ensure DB connection in serverless / local requests
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-  } catch (err) {
-    console.error('DB connection middleware error:', err.message);
-  }
-  next();
-});
-
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '25mb' }));
@@ -62,18 +52,19 @@ if (!process.env.VERCEL) {
 module.exports = app;
 
 if (require.main === module) {
-  connectDB().then(() => {
-    startReminderScheduler();
-  }).catch((err) => {
-    console.error('Failed to connect to the database on startup:', err.message);
-  });
-
+  const PORT = process.env.PORT || 5001;
   const server = http.createServer(app);
   socketHandler(server);
 
-  const PORT = process.env.PORT || 5001;
-  server.listen(PORT, () => {
-    console.log(`RailSmart Server running on http://localhost:${PORT}`);
-    console.log(`RailSmart System Health at http://localhost:${PORT}/api/health`);
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`RailSmart Server running on http://0.0.0.0:${PORT}`);
+    console.log(`RailSmart System Health at http://0.0.0.0:${PORT}/api/health`);
+    
+    // Connect to Database asynchronously in background
+    connectDB().then(() => {
+      startReminderScheduler();
+    }).catch((err) => {
+      console.error('Database initialization notice:', err.message);
+    });
   });
 }
