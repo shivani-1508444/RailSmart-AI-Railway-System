@@ -4,8 +4,8 @@ cd /d "%~dp0"
 echo ===================================================
 echo     RAILSMART - AI-POWERED SMART TRAIN BOOKING
 echo ===================================================
-echo Starting RailSmart Full-Stack Server on Port 5001...
+echo Starting RailSmart Full-Stack Server with NODEMON (Auto-Restart)...
 echo Open your browser at: http://localhost:5001
 echo ===================================================
-node server/server.js
+npx nodemon server/server.js
 pause

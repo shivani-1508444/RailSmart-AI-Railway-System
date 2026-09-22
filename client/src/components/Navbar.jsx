@@ -6,16 +6,23 @@ import { getTranslation } from '../i18n/i18n';
 const Navbar = ({ lang, setLang, openVoiceModal }) => {
   const [user, setUser] = useState(auth.getUser());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState(localStorage.getItem('railsmart_theme') || 'light');
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const syncUser = () => setUser(auth.getUser());
     window.addEventListener('railsmart-auth-change', syncUser);
-    document.documentElement.setAttribute('data-theme', 'light');
+    document.documentElement.setAttribute('data-theme', theme);
     return () => window.removeEventListener('railsmart-auth-change', syncUser);
-  }, []);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('railsmart_theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
 
   const handleLogout = () => {
     auth.logout(false);
@@ -42,6 +49,14 @@ const Navbar = ({ lang, setLang, openVoiceModal }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <button 
             className="btn-lang-switch"
+            onClick={toggleTheme}
+            title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+          >
+            <i className={`fa-solid ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`}></i>
+          </button>
+          
+          <button 
+            className="btn-lang-switch"
             onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
             title="Switch Language"
           >
@@ -63,41 +78,46 @@ const Navbar = ({ lang, setLang, openVoiceModal }) => {
             </div>
           </Link>
 
+          {/* Hamburger Menu Button (Mobile) */}
+          <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <i className={`fa-solid ${mobileMenuOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
+          </button>
+
           {/* Nav Menu */}
-          <ul className="railsmart-nav-menu">
+          <ul className={`railsmart-nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
             <li>
-              <Link to="/" className={`railsmart-nav-link ${location.pathname === '/' ? 'active' : ''}`}>
+              <Link to="/" className={`railsmart-nav-link ${location.pathname === '/' ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <i className="fa-solid fa-house"></i>
                 <span>{getTranslation(lang, 'home')}</span>
               </Link>
             </li>
             <li>
-              <Link to="/trains" className={`railsmart-nav-link ${location.pathname === '/trains' ? 'active' : ''}`}>
+              <Link to="/trains" className={`railsmart-nav-link ${location.pathname === '/trains' ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <i className="fa-solid fa-magnifying-glass" style={{ color: 'var(--primary-color)' }}></i>
                 <span>{getTranslation(lang, 'trainSearch')}</span>
               </Link>
             </li>
             <li>
-              <Link to="/pnr" className={`railsmart-nav-link ${location.pathname === '/pnr' ? 'active' : ''}`}>
+              <Link to="/pnr" className={`railsmart-nav-link ${location.pathname === '/pnr' ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <i className="fa-solid fa-ticket" style={{ color: '#38bdf8' }}></i>
                 <span>{getTranslation(lang, 'pnrStatus')}</span>
               </Link>
             </li>
             <li>
-              <Link to="/live-status" className={`railsmart-nav-link ${location.pathname === '/live-status' ? 'active' : ''}`}>
+              <Link to="/live-status" className={`railsmart-nav-link ${location.pathname === '/live-status' ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <i className="fa-solid fa-satellite-dish" style={{ color: '#00ff88' }}></i>
                 <span>{getTranslation(lang, 'liveStatus')}</span>
               </Link>
             </li>
             <li>
-              <Link to="/e-catering" className={`railsmart-nav-link ${location.pathname === '/e-catering' ? 'active' : ''}`}>
+              <Link to="/e-catering" className={`railsmart-nav-link ${location.pathname === '/e-catering' ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 <i className="fa-solid fa-utensils" style={{ color: '#f59e0b' }}></i>
                 <span>{getTranslation(lang, 'eCatering')}</span>
               </Link>
             </li>
             {user && (
               <li>
-                <Link to="/dashboard" className={`railsmart-nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}>
+                <Link to="/dashboard" className={`railsmart-nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                   <i className="fa-solid fa-gauge-high"></i>
                   <span>{user.role === 'admin' ? 'Admin Center' : getTranslation(lang, 'dashboard')}</span>
                 </Link>

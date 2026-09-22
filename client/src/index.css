@@ -76,6 +76,25 @@
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
 }
 
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-card: #1e293b;
+  --bg-card-hover: #334155;
+  --bg-input: #0f172a;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --border-color: #334155;
+  --border-hover: rgba(245, 158, 11, 0.8);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.7);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -1136,6 +1155,16 @@ input, select, textarea {
   .railsmart-hero-title { font-size: 2.8rem; }
 }
 
+.mobile-menu-btn {
+  display: none;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
 @media (max-width: 768px) {
   .railsmart-topbar { display: none; }
   .railsmart-search-form { grid-template-columns: 1fr; }
@@ -1143,4 +1172,58 @@ input, select, textarea {
   .dashboard-layout { flex-direction: column; }
   .sidebar { width: 100%; height: auto; position: static; }
   .railbot-chat-window { width: calc(100vw - 32px); right: 16px; bottom: 84px; }
+  
+  /* Mobile Menu Styles */
+  .mobile-menu-btn {
+    display: block;
+  }
+  
+  .railsmart-nav-menu {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background: var(--bg-primary);
+    padding: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .railsmart-nav-menu.mobile-open {
+    display: flex;
+  }
+  
+  .user-nav-chip span {
+    display: none;
+  }
+  
+  .railsmart-btn-login span {
+    display: none; /* Can just show icon or keep it small */
+  }
+  .railsmart-btn-login::after {
+    content: '\f2f6'; /* Login Icon */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+  }
 }
+
+@media print {
+  .railsmart-header, .railsmart-topbar, .btn, button, footer, .railbot-widget {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  .railsmart-section {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .glass-card, .train-card-white, [style*='var(--bg-card)'] {
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 10px !important;
+  }
+}

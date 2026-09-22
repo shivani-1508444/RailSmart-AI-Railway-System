@@ -14,7 +14,7 @@ const searchTrains = async (req, res) => {
         $or: [
           { fromStationCode: from.toUpperCase(), toStationCode: to.toUpperCase() },
           { fromStationName: { $regex: from, $options: 'i' }, toStationName: { $regex: to, $options: 'i' } },
-          { 'route.stationCode': from.toUpperCase(), 'route.stationCode': to.toUpperCase() }
+          { 'route.stationCode': { $all: [from.toUpperCase(), to.toUpperCase()] } }
         ]
       };
     }

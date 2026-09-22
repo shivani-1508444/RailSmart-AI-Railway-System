@@ -86,6 +86,7 @@ const BookingFlow = () => {
 
       if (data.success) {
         setConfirmedBooking(data.booking);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         window.showToast('🎉 Ticket Booked & Digital QR Pass Generated!', 'success');
       } else if (data.message && data.message.includes('authorized')) {
         // Token expired - force re-login

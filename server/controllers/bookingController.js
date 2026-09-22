@@ -178,6 +178,10 @@ const cancelBooking = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Booking not found' });
     }
 
+    if (booking.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Access denied: You can only cancel your own bookings' });
+    }
+
     if (booking.status === 'CANCELLED') {
       return res.status(400).json({ success: false, message: 'Ticket is already cancelled' });
     }

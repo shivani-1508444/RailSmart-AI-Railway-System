@@ -8,8 +8,8 @@
     "dotenv": "^16.6.1",
     "express": "^4.22.2",
     "jsonwebtoken": "^9.0.3",
-    "mongodb-memory-server": "^11.2.0",
     "mongoose": "^8.24.4",
+    "railsmart": "file:..",
     "socket.io": "^4.8.3"
   }
 }

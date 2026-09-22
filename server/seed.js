@@ -14,8 +14,10 @@ const Payment = require('./models/Payment');
 
 const seedDatabase = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/railsmart');
-    console.log('Connected to MongoDB for RailSmart seeding...');
+    if (mongoose.connection.readyState !== 1) {
+      await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/railsmart');
+      console.log('Connected to MongoDB for RailSmart seeding...');
+    }
 
     // Clear existing collections
     await User.deleteMany({});
@@ -334,11 +336,15 @@ const seedDatabase = async () => {
     });
 
     console.log('Database Seeding Completed Successfully! 🚆');
-    process.exit(0);
+    return true;
   } catch (error) {
     console.error('Seeding Error:', error);
-    process.exit(1);
+    throw error;
   }
 };
 
-seedDatabase();
+if (require.main === module) {
+  seedDatabase().then(() => process.exit(0)).catch(() => process.exit(1));
+}
+
+module.exports = seedDatabase;

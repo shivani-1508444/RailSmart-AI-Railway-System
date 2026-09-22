@@ -1,41 +1,49 @@
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
-const { execSync } = require('child_process');
-const path = require('path');
 
-let mongoServer;
+let isConnected = false;
 
 const connectDB = async () => {
-  try {
-    const envUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/railsmart';
-    let uri = envUri;
-    let isMemory = false;
-    
-    // Start in-memory DB if URI is localhost
-    if (envUri.includes('127.0.0.1') || envUri.includes('localhost')) {
-      console.log('Starting in-memory MongoDB Server for local testing...');
-      mongoServer = await MongoMemoryServer.create();
-      uri = mongoServer.getUri();
-      process.env.MONGO_URI = uri; // For seed.js
-      isMemory = true;
-      console.log(`In-memory MongoDB started at ${uri}`);
-    }
+  if (isConnected && mongoose.connection.readyState === 1) {
+    return;
+  }
 
-    const conn = await mongoose.connect(uri);
+  const uri = process.env.MONGO_URI;
+
+  if (!uri) {
+    console.warn('⚠️ MONGO_URI environment variable is missing.');
+    if (process.env.VERCEL) {
+      console.warn('Please add MONGO_URI in your Vercel Project Environment Variables.');
+      return;
+    }
+  }
+
+  const dbUri = uri || 'mongodb://127.0.0.1:27017/railsmart';
+
+  try {
+    const conn = await mongoose.connect(dbUri, {
+      serverSelectionTimeoutMS: 5000
+    });
+
+    isConnected = true;
     console.log(`MongoDB Connected: ${conn.connection.host}`);
-    
-    if (isMemory) {
-        console.log('Seeding in-memory database... this may take a moment.');
-        try {
-            execSync(`node "${path.join(__dirname, '../seed.js')}"`, { stdio: 'inherit' });
-            console.log('Seeding finished.');
-        } catch(err) {
-            console.error('Seeding failed:', err.message);
-        }
+
+    // Auto-seed if DB is empty
+    try {
+      const Train = require('../models/Train');
+      const count = await Train.countDocuments();
+      if (count === 0) {
+        console.log('Database empty. Running auto-seeding...');
+        const seedDatabase = require('../seed');
+        await seedDatabase();
+      }
+    } catch (seedErr) {
+      console.error('Auto-seed check notice:', seedErr.message);
     }
   } catch (error) {
     console.error(`Error connecting to MongoDB: ${error.message}`);
-    process.exit(1);
+    if (!process.env.VERCEL) {
+      // In non-vercel local env without MONGO_URI, log warning
+    }
   }
 };
 

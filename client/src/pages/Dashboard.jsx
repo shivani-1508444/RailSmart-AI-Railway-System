@@ -212,6 +212,58 @@ const Dashboard = () => {
           </div>
         )}
 
+        {/* ================= USER: JOURNEY REMINDERS ================= */}
+        {activeTab === 'reminders' && (
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ fontSize: '1.8rem', margin: 0, color: 'var(--text-primary)' }}>🔔 Journey Reminders</h2>
+              {notifications.some(n => !n.isRead) && (
+                <button
+                  className="btn btn-secondary"
+                  style={{ padding: '8px 14px', fontSize: '0.82rem' }}
+                  onClick={async () => {
+                    const res = await auth.fetch('/api/notifications/read-all', { method: 'PATCH' });
+                    if (res.success) {
+                      auth.fetch('/api/notifications').then(r => { if (r.success) setNotifications(r.notifications); });
+                    }
+                  }}
+                >
+                  <i className="fa-solid fa-check-double"></i> Mark All Read
+                </button>
+              )}
+            </div>
+
+            {notifications.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {notifications.map(n => (
+                  <div
+                    key={n._id}
+                    className="glass-card"
+                    style={{
+                      borderLeft: n.isRead ? '4px solid #cbd5e1' : '4px solid var(--primary-color)',
+                      opacity: n.isRead ? 0.75 : 1
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                      <div>
+                        <strong style={{ color: 'var(--text-primary)' }}>{n.title}</strong>
+                        <p style={{ margin: '6px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.88rem' }}>{n.message}</p>
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                        {new Date(n.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="glass-card" style={{ textAlign: 'center', padding: '50px' }}>
+                <p style={{ color: 'var(--text-secondary)' }}>No journey reminders yet. Reminders appear here 24 hours before your confirmed journeys.</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ================= USER: SECURITY LOGS ================= */}
         {activeTab === 'security-logs' && (
           <div style={{ maxWidth: '1000px', margin: '0 auto' }}>

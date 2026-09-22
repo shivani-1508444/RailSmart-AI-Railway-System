@@ -51,15 +51,56 @@ const VoiceSearchModal = ({ isOpen, onClose }) => {
 
   const handleApplyVoiceSearch = () => {
     const text = transcript.toLowerCase();
+    
+    const stations = {
+      delhi: 'NDLS',
+      mumbai: 'BCT',
+      varanasi: 'BSB',
+      banaras: 'BSB',
+      lucknow: 'LKO',
+      bangalore: 'SBC',
+      bengaluru: 'SBC',
+      chennai: 'MAS',
+      kanpur: 'CNB',
+      agra: 'AGC',
+      pune: 'PUNE',
+      kolkata: 'HWH'
+    };
+
     let from = 'NDLS';
     let to = 'BCT';
 
-    if (text.includes('delhi')) from = 'NDLS';
-    if (text.includes('mumbai')) to = 'BCT';
-    if (text.includes('varanasi') || text.includes('banaras')) to = 'BSB';
-    if (text.includes('lucknow')) to = 'LKO';
-    if (text.includes('bangalore') || text.includes('bengaluru')) to = 'SBC';
-    if (text.includes('chennai')) to = 'MAS';
+    // 1. Try explicit matching for "from X" and "to Y" (English & Hindi)
+    const fromRegex = /(?:from|se)\s+([a-z]+)/;
+    const toRegex = /(?:to|tak)\s+([a-z]+)/;
+    
+    const fMatch = text.match(fromRegex);
+    const tMatch = text.match(toRegex);
+
+    let foundFrom = fMatch && stations[fMatch[1]] ? stations[fMatch[1]] : null;
+    let foundTo = tMatch && stations[tMatch[1]] ? stations[tMatch[1]] : null;
+
+    // 2. Fallback: Find cities in the order they were spoken
+    if (!foundFrom || !foundTo) {
+      const found = [];
+      const words = text.split(/\s+/);
+      for (const w of words) {
+        if (stations[w] && !found.includes(stations[w])) {
+          found.push(stations[w]);
+        }
+      }
+      
+      if (found.length >= 2) {
+        if (!foundFrom) foundFrom = found[0];
+        if (!foundTo) foundTo = found[1];
+      } else if (found.length === 1) {
+        foundTo = found[0];
+        foundFrom = foundTo === 'NDLS' ? 'BCT' : 'NDLS'; 
+      }
+    }
+
+    if (foundFrom) from = foundFrom;
+    if (foundTo) to = foundTo;
 
     onClose();
     navigate(`/trains?from=${from}&to=${to}`);

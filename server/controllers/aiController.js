@@ -12,15 +12,16 @@ const chatWithRailBot = async (req, res) => {
 
     const aiResult = await parseRailBotIntent(message, context);
 
+    const logData = {
+      sessionId: sessionId || 'session_guest',
+      userMessage: message,
+      botReply: aiResult.reply,
+      detectedIntent: aiResult.intent
+    };
     if (req.user) {
-      await ChatLog.create({
-        userId: req.user._id,
-        sessionId: sessionId || 'session_guest',
-        userMessage: message,
-        botReply: aiResult.reply,
-        detectedIntent: aiResult.intent
-      });
+      logData.userId = req.user._id;
     }
+    await ChatLog.create(logData);
 
     res.json({
       success: true,
