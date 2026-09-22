@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 let isConnected = false;
 let memoryServer = null;
 
-// Disable Mongoose buffering so un-connected DB queries fail fast instead of hanging HTTP requests
+// Disable Mongoose command buffering so queries don't hang HTTP requests
 mongoose.set('bufferCommands', false);
 
 const connectDB = async () => {
@@ -11,23 +11,37 @@ const connectDB = async () => {
     return;
   }
 
-  const primaryUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/railsmart';
-
-  try {
-    const conn = await mongoose.connect(primaryUri, {
-      serverSelectionTimeoutMS: 3000
-    });
-
-    isConnected = true;
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-    await checkAndSeed();
-    return;
-  } catch (primaryErr) {
-    console.warn(`Primary MongoDB Notice: ${primaryErr.message}`);
+  // 1. If user provided a Cloud MONGO_URI in process.env, try it
+  if (process.env.MONGO_URI) {
+    try {
+      const conn = await mongoose.connect(process.env.MONGO_URI, {
+        serverSelectionTimeoutMS: 4000
+      });
+      isConnected = true;
+      console.log(`MongoDB Connected (Cloud URI): ${conn.connection.host}`);
+      await checkAndSeed();
+      return;
+    } catch (cloudErr) {
+      console.warn(`Cloud MONGO_URI Connection Notice: ${cloudErr.message}`);
+    }
   }
 
-  // Fallback to In-Memory MongoDB engine if available
+  // 2. Try Local MongoDB daemon if running
   try {
+    const conn = await mongoose.connect('mongodb://127.0.0.1:27017/railsmart', {
+      serverSelectionTimeoutMS: 1500
+    });
+    isConnected = true;
+    console.log(`MongoDB Connected (Local): ${conn.connection.host}`);
+    await checkAndSeed();
+    return;
+  } catch (localErr) {
+    // Local MongoDB daemon not running, proceed to in-memory engine
+  }
+
+  // 3. Automated In-Memory MongoDB Engine (Zero-Config Database for Render & Local)
+  try {
+    console.log('⚡ Launching Zero-Config In-Memory MongoDB Engine...');
     if (!memoryServer) {
       const { MongoMemoryServer } = require('mongodb-memory-server');
       memoryServer = await MongoMemoryServer.create({
@@ -37,10 +51,10 @@ const connectDB = async () => {
     const memUri = memoryServer.getUri();
     const conn = await mongoose.connect(memUri);
     isConnected = true;
-    console.log(`✅ In-Memory MongoDB Engine Connected Successfully: ${conn.connection.host}`);
+    console.log(`✅ Zero-Config In-Memory MongoDB Connected: ${conn.connection.host}`);
     await checkAndSeed();
   } catch (memErr) {
-    console.warn('In-Memory MongoDB Notice:', memErr.message);
+    console.error('In-Memory DB Notice:', memErr.message);
   }
 };
 
