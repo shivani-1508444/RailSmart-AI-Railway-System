@@ -384,6 +384,28 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
+        {/* ================= ADMIN: REGISTERED USERS ================= */}
+        {activeTab === 'admin-users' && (
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <h2 style={{ fontSize: '1.8rem', marginBottom: '20px', color: 'var(--text-primary)' }}>👥 Registered Passengers & Admin Accounts</h2>
+            <div className="glass-card">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {adminUsers.map(u => (
+                  <div key={u._id} style={{ padding: '14px 18px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <strong style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>{u.name}</strong>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Email: {u.email} • Phone: {u.phone}</div>
+                    </div>
+                    <span style={{ padding: '4px 12px', borderRadius: '14px', fontSize: '0.78rem', fontWeight: 800, background: u.role === 'admin' ? 'rgba(245,158,11,0.2)' : 'rgba(56,189,248,0.2)', color: u.role === 'admin' ? 'var(--primary-color)' : '#38bdf8' }}>
+                      {u.role?.toUpperCase()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

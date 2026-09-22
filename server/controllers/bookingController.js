@@ -26,9 +26,11 @@ const createBooking = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Train not found' });
     }
 
-    // Find class fare
-    const classObj = train.classes.find(c => c.classCode === travelClass) || train.classes[0];
-    const baseRate = quota === 'TATKAL' ? classObj.tatkalFare : classObj.baseFare;
+    // Find class fare safely
+    const classObj = (train.classes && train.classes.length > 0) 
+      ? (train.classes.find(c => c.classCode === travelClass) || train.classes[0]) 
+      : null;
+    const baseRate = classObj ? (quota === 'TATKAL' ? classObj.tatkalFare : classObj.baseFare) : 1200;
 
     const baseFareTotal = baseRate * passengers.length;
     const reservationFee = 40 * passengers.length;

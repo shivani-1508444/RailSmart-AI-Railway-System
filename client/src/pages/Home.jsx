@@ -277,7 +277,7 @@ const Home = ({ lang, openVoiceModal }) => {
                 <button 
                   className="btn btn-primary" 
                   style={{ flex: 1.2, padding: '10px', fontSize: '0.9rem' }}
-                  onClick={() => navigate(`/booking?trainId=${train._id}&class=CC&date=${journeyDate}`)}
+                  onClick={() => navigate(`/booking?trainId=${train._id}&class=${train.classes?.[0]?.classCode || 'CC'}&date=${journeyDate}`)}
                 >
                   Book Now <i className="fa-solid fa-arrow-right"></i>
                 </button>

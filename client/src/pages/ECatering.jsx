@@ -63,6 +63,11 @@ const ECatering = () => {
       return;
     }
 
+    if (!selectedRestaurant) {
+      window.showToast('Please select a restaurant', 'warning');
+      return;
+    }
+
     try {
       const data = await auth.fetch('/api/food/orders', {
         method: 'POST',
@@ -70,7 +75,7 @@ const ECatering = () => {
           pnr: pnrParam || '2458913456',
           restaurantId: selectedRestaurant._id,
           deliveryStationCode: stationCode,
-          deliveryStationName: selectedRestaurant.stationName || 'Selected Station',
+          deliveryStationName: selectedRestaurant.stationName || selectedRestaurant.name || 'Selected Station',
           coachNumber: coachNum,
           seatNumber: seatNum,
           passengerName,
