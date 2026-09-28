@@ -1,36 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const VoiceSearchModal = ({ isOpen, onClose }) => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [selectedLang, setSelectedLang] = useState('hi-IN'); // 'hi-IN' or 'en-IN'
-  const [statusMessage, setStatusMessage] = useState('Click microphone and speak your route (e.g. "Delhi to Mumbai" or "Varanasi se Delhi")');
+  const [statusMessage, setStatusMessage] = useState('Click microphone to speak your route (e.g. "Delhi to Mumbai" or "Varanasi se Delhi")');
+  const recognitionRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isOpen) {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch (e) {}
+      }
       setIsListening(false);
       setTranscript('');
-      setStatusMessage('Click microphone and speak your route (e.g. "Delhi to Mumbai" or "Varanasi se Delhi")');
+      setStatusMessage('Click microphone to speak your route (e.g. "Delhi to Mumbai" or "Varanasi se Delhi")');
     }
   }, [isOpen]);
 
-  const startVoiceRecognition = () => {
+  const startVoiceRecognition = async () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setStatusMessage('❌ Voice recognition is not supported in this browser. Please use Chrome, Edge, or Safari.');
       return;
     }
 
+    // Stop previous instance if active
+    if (isListening && recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
+      setIsListening(false);
+      setStatusMessage('Stopped listening. Review route or click mic to try again.');
+      return;
+    }
+
+    // Step 1: Explicitly request microphone permission from browser
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Release stream track after permission confirmed so SpeechRecognition can use it
+        stream.getTracks().forEach(track => track.stop());
+      } catch (micErr) {
+        setStatusMessage('⚠️ Microphone access blocked. Please click the camera/mic icon in your browser address bar and select "Allow".');
+        setIsListening(false);
+        return;
+      }
+    }
+
+    // Step 2: Initialize Web Speech API
     const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
     recognition.lang = selectedLang;
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = true;
 
     recognition.onstart = () => {
       setIsListening(true);
-      setStatusMessage('🎙️ Listening... Speak your route clearly now');
+      setStatusMessage('🎙️ Listening... Speak your route clearly now (e.g. "Delhi to Mumbai")');
     };
 
     recognition.onresult = (event) => {
@@ -38,33 +65,33 @@ const VoiceSearchModal = ({ isOpen, onClose }) => {
       for (let i = 0; i < event.results.length; i++) {
         currentTranscript += event.results[i][0].transcript;
       }
-      setTranscript(currentTranscript);
+      if (currentTranscript.trim()) {
+        setTranscript(currentTranscript);
+      }
     };
 
     recognition.onerror = (event) => {
-      setIsListening(false);
+      console.warn('Speech error:', event.error);
       const err = event.error;
       if (err === 'not-allowed') {
-        setStatusMessage('⚠️ Microphone access denied. Please click the mic icon in your browser address bar to allow mic permissions.');
+        setStatusMessage('⚠️ Microphone access denied. Please allow mic permissions in browser bar.');
+        setIsListening(false);
       } else if (err === 'no-speech') {
-        setStatusMessage('🗣️ No speech detected. Please click the microphone button and speak again.');
+        setStatusMessage('🗣️ No speech detected. Please speak clearly into your mic.');
       } else if (err === 'network') {
-        setStatusMessage('📶 Network issue. Please check your internet connection for speech recognition.');
-      } else {
-        setStatusMessage('⚠️ Voice recognition error. Please try again or choose a sample route.');
+        setStatusMessage('📶 Speech recognition network glitch. You can also type your route below.');
       }
     };
 
     recognition.onend = () => {
       setIsListening(false);
-      setStatusMessage('✅ Listening finished. Review your voice command below or search trains.');
     };
 
     try {
       recognition.start();
     } catch (err) {
       setIsListening(false);
-      setStatusMessage('Microphone busy or already active. Please try again.');
+      setStatusMessage('Microphone initializing. Click mic once more to speak.');
     }
   };
 
