@@ -17,10 +17,16 @@ app.use(cors());
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
-// Static frontend build (for standalone local server mode)
-if (!process.env.VERCEL) {
-  app.use(express.static(path.join(__dirname, '../client/dist')));
-}
+// Database auto-connect middleware (crucial for Vercel serverless functions & Render)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('Database connection notice:', err.message);
+    next();
+  }
+});
 
 // API Routes
 app.use('/api/auth', require('./routes/authRoutes'));
