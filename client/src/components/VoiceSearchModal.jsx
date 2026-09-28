@@ -255,17 +255,24 @@ const VoiceSearchModal = ({ isOpen, onClose }) => {
           <i className={`fa-solid ${isListening ? 'fa-microphone-lines' : 'fa-microphone'}`}></i>
         </div>
 
-        {/* Live Transcript Display */}
-        {transcript && (
-          <div style={{ background: 'var(--bg-secondary)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '18px', textAlign: 'left' }}>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 700 }}>Recognized Voice Command:</span>
-            <p style={{ fontSize: '1.05rem', color: 'var(--primary-color)', fontWeight: 700, margin: '4px 0 0 0' }}>"{transcript}"</p>
-          </div>
-        )}
+        {/* Spoken / Typed Command Box */}
+        <div style={{ marginBottom: '18px', textAlign: 'left' }}>
+          <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
+            Voice Command / Route Input:
+          </label>
+          <input 
+            type="text" 
+            className="railsmart-input" 
+            placeholder="e.g. Delhi to Mumbai or Varanasi se Delhi..." 
+            value={transcript} 
+            onChange={(e) => setTranscript(e.target.value)} 
+            style={{ width: '100%', padding: '12px 16px', fontSize: '1rem', fontWeight: 600 }}
+          />
+        </div>
 
         {/* Sample Voice Hints */}
         <div style={{ marginBottom: '20px' }}>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '8px' }}>💡 Quick Sample Voice Commands:</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '8px' }}>💡 Quick Sample Routes:</span>
           <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
             {['Delhi to Mumbai', 'Varanasi se Delhi', 'Bangalore to Chennai', 'Lucknow to Kanpur'].map(sample => (
               <button
@@ -290,8 +297,8 @@ const VoiceSearchModal = ({ isOpen, onClose }) => {
 
         {/* Action Buttons */}
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-          <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleApplyVoiceSearch} disabled={!transcript}>
+          <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+          <button type="button" className="btn btn-primary" onClick={handleApplyVoiceSearch} style={{ minWidth: '150px' }}>
             Find Trains <i className="fa-solid fa-arrow-right"></i>
           </button>
         </div>
