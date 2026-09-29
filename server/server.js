@@ -65,6 +65,10 @@ app.get('/api/health', (req, res) => {
 
 // Serve frontend for all SPA routes (for standalone local server mode)
 if (!process.env.VERCEL) {
+  // NEW: client/dist ki files (JS, CSS, images) serve karo
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+
+  // Baaki sab routes par index.html bhejo (React Router ke liye)
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/dist/index.html'));
   });
