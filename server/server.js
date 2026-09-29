@@ -2,9 +2,24 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
 
-dotenv.config();
+// .env dhundho: pehle project root me, phir server folder me
+const envCandidates = [
+  path.join(__dirname, '../.env'),
+  path.join(__dirname, '.env')
+];
+const envPath = envCandidates.find((p) => fs.existsSync(p));
+
+if (envPath) {
+  const result = dotenv.config({ path: envPath, override: true });
+  console.log('[ENV] Loaded .env from:', envPath, '| error:', result.error ? result.error.message : 'none');
+} else {
+  console.log('[ENV] .env file NOT FOUND in project root or server/');
+}
+// Debug line (password print nahi hota). Kaam ho jaye to hata dena.
+console.log('[ENV] URI host:', (process.env.MONGO_URI || 'NOT SET').split('@').pop());
 
 const connectDB = require('./config/db');
 const socketHandler = require('./socket/socketHandler');
@@ -65,7 +80,7 @@ if (require.main === module) {
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`RailSmart Server running on http://0.0.0.0:${PORT}`);
     console.log(`RailSmart System Health at http://0.0.0.0:${PORT}/api/health`);
-    
+
     // Connect to Database asynchronously in background
     connectDB().then(() => {
       startReminderScheduler();
