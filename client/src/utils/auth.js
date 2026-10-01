@@ -43,8 +43,11 @@ const auth = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
+    const baseUrl = import.meta.env.VITE_API_URL || '';
+    const fullUrl = url.startsWith('/api') ? `${baseUrl}${url}` : url;
+
     try {
-      const res = await fetch(url, { ...options, headers });
+      const res = await fetch(fullUrl, { ...options, headers });
       if (res.status === 401) {
         // Token expired or invalid - clear session and redirect to login
         this.logout(false);

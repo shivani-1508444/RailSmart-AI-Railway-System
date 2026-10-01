@@ -35,14 +35,15 @@ const VoiceSearchModal = ({ isOpen, onClose }) => {
       return;
     }
 
-    // Step 1: Explicitly request microphone permission from browser
+    // Step 1: Request microphone permission from browser
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Release stream track after permission confirmed so SpeechRecognition can use it
         stream.getTracks().forEach(track => track.stop());
       } catch (micErr) {
-        setStatusMessage('⚠️ Microphone access blocked. Please click the camera/mic icon in your browser address bar and select "Allow".');
+        // Auto-fallback: pre-fill popular route so search never fails
+        if (!transcript) setTranscript('Delhi to Mumbai');
+        setStatusMessage('💡 Mic permission is blocked in browser settings. Auto-filled "Delhi to Mumbai" — click Find Trains or select a route below!');
         setIsListening(false);
         return;
       }
